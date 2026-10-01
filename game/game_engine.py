@@ -10,6 +10,7 @@ class GameEngine:
         self.current_card = self.deck.draw()
         self.next_card = None
         self.score = 0
+        self.streak = 0
         self.status_msg = "Will the next card be HIGHER or LOWER?"
         self.status_color = (220, 220, 220)
 
@@ -34,11 +35,17 @@ class GameEngine:
             correct = self.next_card.numeric_rank < self.current_card.numeric_rank
         
         if correct:
-            self.score += 1
-            self.status_msg = f"CORRECT! {self.next_card.rank_str} vs {self.current_card.rank_str}"
+            self.streak += 1
+            multiplier = 3 if self.streak >= 5 else 2 if self.streak >= 3 else 1
+            self.score += multiplier
+            self.status_msg = (
+                f"CORRECT! {self.next_card.rank_str} vs {self.current_card.rank_str} "
+                f"(+{multiplier}, {self.streak} streak)"
+            )
             self.status_color = (80, 220, 80)
         else:
             self.score = max(0, self.score - 1)
+            self.streak = 0
             self.status_msg = f"WRONG! {self.next_card.rank_str} vs {self.current_card.rank_str}"
             self.status_color = (235, 75, 75)
 
@@ -62,6 +69,9 @@ class GameEngine:
 
         score_surf = self.font_medium.render(f"Score: {self.score}", True, (255, 220, 80))
         screen.blit(score_surf, (30, 30))
+
+        streak_surf = self.font_small.render(f"Streak: {self.streak}", True, (255, 220, 80))
+        screen.blit(streak_surf, (30, 65))
 
         rem_surf = self.font_small.render(f"Deck: {self.deck.remaining} left", True, (210, 210, 210))
         screen.blit(rem_surf, (self.width - rem_surf.get_width() - 30, 35))
