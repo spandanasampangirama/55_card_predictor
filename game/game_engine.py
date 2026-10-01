@@ -9,6 +9,8 @@ class GameEngine:
 
         self.current_card = self.deck.draw()
         self.next_card = None
+        self.previous_card = None
+        self.reveal_end_time = 0
         self.score = 0
         self.streak = 0
         self.status_msg = "Will the next card be HIGHER or LOWER?"
@@ -24,6 +26,7 @@ class GameEngine:
 
     def evaluate_guess(self, guess):
         """Draws next card and evaluates prediction."""
+        self.previous_card = self.current_card
         self.next_card = self.deck.draw()
 
         #BUG SYMPTON:
@@ -54,16 +57,20 @@ class GameEngine:
                 self.status_color = (235, 75, 75)
 
         self.current_card = self.next_card
+        self.reveal_end_time = pygame.time.get_ticks() + 800
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            if pygame.time.get_ticks() < self.reveal_end_time:
+                return
             if self.btn_higher.collidepoint(event.pos):
                 self.evaluate_guess("HIGHER")
             elif self.btn_lower.collidepoint(event.pos):
                 self.evaluate_guess("LOWER")
 
     def update(self):
-        pass
+        if self.previous_card is not None and pygame.time.get_ticks() >= self.reveal_end_time:
+            self.previous_card = None
 
     def render(self, screen):
         screen.fill((25, 80, 45))
@@ -81,7 +88,11 @@ class GameEngine:
         screen.blit(rem_surf, (self.width - rem_surf.get_width() - 30, 35))
 
         card_w, card_h = 130, 180
-        self.current_card.render(screen, self.width // 2 - card_w // 2, 100, card_w, card_h)
+        if self.previous_card is not None and pygame.time.get_ticks() < self.reveal_end_time:
+            self.previous_card.render(screen, self.width // 2 - card_w - 20, 100, card_w, card_h)
+            self.current_card.render(screen, self.width // 2 + 20, 100, card_w, card_h)
+        else:
+            self.current_card.render(screen, self.width // 2 - card_w // 2, 100, card_w, card_h)
 
         status_surf = self.font_small.render(self.status_msg, True, self.status_color)
         screen.blit(status_surf, (self.width // 2 - status_surf.get_width() // 2, 310))
