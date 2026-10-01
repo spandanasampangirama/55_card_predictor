@@ -29,25 +29,29 @@ class GameEngine:
         #BUG SYMPTON:
         #Face and high cards are incorrectly judged lower than small cards.
         
-        if guess == "HIGHER":
-            correct = self.next_card.numeric_rank > self.current_card.numeric_rank
+        if self.next_card.numeric_rank == self.current_card.numeric_rank:
+            self.status_msg = "PUSH / TIE! Rank matched."
+            self.status_color = (255, 220, 80)
         else:
-            correct = self.next_card.numeric_rank < self.current_card.numeric_rank
-        
-        if correct:
-            self.streak += 1
-            multiplier = 3 if self.streak >= 5 else 2 if self.streak >= 3 else 1
-            self.score += multiplier
-            self.status_msg = (
-                f"CORRECT! {self.next_card.rank_str} vs {self.current_card.rank_str} "
-                f"(+{multiplier}, {self.streak} streak)"
-            )
-            self.status_color = (80, 220, 80)
-        else:
-            self.score = max(0, self.score - 1)
-            self.streak = 0
-            self.status_msg = f"WRONG! {self.next_card.rank_str} vs {self.current_card.rank_str}"
-            self.status_color = (235, 75, 75)
+            if guess == "HIGHER":
+                correct = self.next_card.numeric_rank > self.current_card.numeric_rank
+            else:
+                correct = self.next_card.numeric_rank < self.current_card.numeric_rank
+
+            if correct:
+                self.streak += 1
+                multiplier = 3 if self.streak >= 5 else 2 if self.streak >= 3 else 1
+                self.score += multiplier
+                self.status_msg = (
+                    f"CORRECT! {self.next_card.rank_str} vs {self.current_card.rank_str} "
+                    f"(+{multiplier}, {self.streak} streak)"
+                )
+                self.status_color = (80, 220, 80)
+            else:
+                self.score = max(0, self.score - 1)
+                self.streak = 0
+                self.status_msg = f"WRONG! {self.next_card.rank_str} vs {self.current_card.rank_str}"
+                self.status_color = (235, 75, 75)
 
         self.current_card = self.next_card
 
